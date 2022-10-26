@@ -1,14 +1,9 @@
 package com.bianjiahao.ts.utils;
 
-import com.alibaba.fastjson.JSON;
-import com.volcengine.model.request.LangDetectRequest;
 import com.volcengine.model.request.TranslateTextRequest;
-import com.volcengine.model.response.LangDetectResponse;
 import com.volcengine.model.response.TranslateTextResponse;
 import com.volcengine.service.translate.ITranslateService;
 import com.volcengine.service.translate.impl.TranslateServiceImpl;
-
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,13 +25,11 @@ public class TranslateToEnglish {
             // translateTextRequest.setSourceLanguage("en"); // 不设置表示自动检测
             translateTextRequest.setTargetLanguage("en");
             translateTextRequest.setTextList(Collections.singletonList(text));
-
             TranslateTextResponse translateText = translateService.translateText(translateTextRequest);
-
             List<TranslateTextResponse.Translation> list = translateText.getTranslationList();
-            System.out.println(text);
             ans = list.get(0).getTranslation();
         } catch (Exception e) {
+            System.out.println(text);
             e.printStackTrace();
         }
         return ans;
