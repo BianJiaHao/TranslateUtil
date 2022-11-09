@@ -1,8 +1,9 @@
 package com.bianjiahao.ts.controller;
 
-import com.bianjiahao.ts.utils.ExcelUtils;
-import com.bianjiahao.ts.utils.WordUtils;
+import com.bianjiahao.ts.service.impl.TranslateExcelImpl;
+import com.bianjiahao.ts.service.impl.TranslateWordImpl;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,11 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("translate")
 public class TranslateController {
 
+    @Autowired
+    private TranslateWordImpl translateWord;
+    @Autowired
+    private TranslateExcelImpl translateExcel;
+
     @PostMapping("/test")
     public void test(HttpServletResponse response, @RequestParam("file") MultipartFile file) throws Exception{
         // 获取文件类型
@@ -27,9 +33,9 @@ public class TranslateController {
         String[] split = fileName.split("\\.");
         String fileType = split[split.length - 1];
         if ("doc".equals(fileType) || "docx".equals(fileType)) {
-            WordUtils.readWord(file);
+            translateWord.translateFile(file);
+        }else if ("xls".equals(fileType) || "xlsx".equals(fileType)) {
+            translateExcel.translateFile(file);
         }
-
-        //ExcelUtils.readExcel(file);
     }
 }

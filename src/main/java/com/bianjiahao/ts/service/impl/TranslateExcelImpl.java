@@ -1,28 +1,35 @@
-package com.bianjiahao.ts.utils;
+package com.bianjiahao.ts.service.impl;
 
 import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
+import com.bianjiahao.ts.service.TranslateService;
+import com.volcengine.service.translate.ITranslateService;
+import com.volcengine.service.translate.impl.TranslateServiceImpl;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import cn.hutool.poi.excel.ExcelUtil;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * excel读写工具类
- * @author bianjiahao
- */
-public class ExcelUtils {
+@Service("excelTranslate")
+public class TranslateExcelImpl implements TranslateService {
 
     private final static String XLS = "xls";
     private final static String XLSX = "xlsx";
+    ITranslateService translateService = TranslateServiceImpl.getInstance();
 
+    @Autowired
+    private TranslateCommonImpl translateCommon;
 
-    public static void readExcel(MultipartFile file) throws IOException {
+    @Override
+    public void translateFile(MultipartFile file) throws Exception{
         // 检查文件
         checkFile(file);
         // 获得Workbook工作薄对象
@@ -64,7 +71,7 @@ public class ExcelUtils {
                         Cell cell = row.getCell(cellNum);
                         if (cell != null) {
                             String cellValue = getCellValue(cell);
-                            String value = TranslateToEnglish.translateToEnglish(cellValue);
+                            String value = translateCommon.translateToEnglish(cellValue,translateService);
                             cell.setCellValue(value);
                         }
                     }
@@ -77,7 +84,7 @@ public class ExcelUtils {
         }
     }
 
-    public static void checkFile(MultipartFile file) throws IOException {
+    public void checkFile(MultipartFile file) throws IOException {
         // 判断文件是否存在
         if (null == file) {
             throw new FileNotFoundException("文件不存在！");
@@ -90,7 +97,7 @@ public class ExcelUtils {
         }
     }
 
-    public static String getCellValue(Cell cell) {
+    public String getCellValue(Cell cell) {
         String cellValue = "";
         if (cell == null) {
             return cellValue;

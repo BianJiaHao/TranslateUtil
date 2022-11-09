@@ -1,19 +1,21 @@
-package com.bianjiahao.ts.utils;
+package com.bianjiahao.ts.service.impl;
 
 import com.volcengine.model.request.TranslateTextRequest;
 import com.volcengine.model.response.TranslateTextResponse;
 import com.volcengine.service.translate.ITranslateService;
-import com.volcengine.service.translate.impl.TranslateServiceImpl;
+import org.springframework.stereotype.Service;
+
 import java.util.Collections;
 import java.util.List;
 
 /**
- * @author bianjiahao
+ * @author admin
  */
-public class TranslateToEnglish {
+@Service("translateCommonImpl")
+public class TranslateCommonImpl {
 
-    public static String translateToEnglish(String text) {
-        ITranslateService translateService = TranslateServiceImpl.getInstance();
+
+    public String translateToEnglish(String text,ITranslateService translateService) {
 
         translateService.setAccessKey("AKLTNWQ4ZjVkNjFmNWYwNGQzNmFmNDM4MDU4Y2M5ZjVmZjU");
         translateService.setSecretKey("Wm1RME9XSXhOR1EyWm1Rd05EZGxZMkUyTldOak5qUXdNR1ZsTVdJMFl6UQ==");
