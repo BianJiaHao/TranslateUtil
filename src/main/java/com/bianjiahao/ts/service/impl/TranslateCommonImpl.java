@@ -15,7 +15,7 @@ import java.util.List;
 public class TranslateCommonImpl {
 
 
-    public String translateToEnglish(String text,ITranslateService translateService) {
+    public String translateToEnglish(String text,ITranslateService translateService,String language) {
 
         translateService.setAccessKey("AKLTNWQ4ZjVkNjFmNWYwNGQzNmFmNDM4MDU4Y2M5ZjVmZjU");
         translateService.setSecretKey("Wm1RME9XSXhOR1EyWm1Rd05EZGxZMkUyTldOak5qUXdNR1ZsTVdJMFl6UQ==");
@@ -25,7 +25,10 @@ public class TranslateCommonImpl {
         try {
             TranslateTextRequest translateTextRequest = new TranslateTextRequest();
             // translateTextRequest.setSourceLanguage("en"); // 不设置表示自动检测
-            translateTextRequest.setTargetLanguage("en");
+            translateTextRequest.setTargetLanguage(language);
+
+
+
             translateTextRequest.setTextList(Collections.singletonList(text));
             TranslateTextResponse translateText = translateService.translateText(translateTextRequest);
             List<TranslateTextResponse.Translation> list = translateText.getTranslationList();

@@ -1,15 +1,18 @@
 package com.bianjiahao.ts.controller;
 
+import com.bianjiahao.ts.service.impl.FileServiceImpl;
 import com.bianjiahao.ts.service.impl.TranslateExcelImpl;
 import com.bianjiahao.ts.service.impl.TranslateWordImpl;
+import com.bianjiahao.ts.utils.R;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author bianjiahao
@@ -22,20 +25,35 @@ public class TranslateController {
     private TranslateWordImpl translateWord;
     @Autowired
     private TranslateExcelImpl translateExcel;
+    @Autowired
+    private FileServiceImpl fileService;
 
-    @PostMapping("/test")
-    public void test(HttpServletResponse response, @RequestParam("file") MultipartFile file) throws Exception{
+    @PostMapping("/upload")
+    public R upload(@RequestParam MultipartFile file) throws IOException {
+        String filePath = fileService.uploadFile(file);
+        return R.ok().put("filePath",filePath);
+    }
+
+    @RequestMapping("/test/{path}")
+    public void test(HttpServletResponse response, @PathVariable("path") String path) throws Exception{
+        String[] split1 = path.split("-");
+        String name = split1[0];
+        String language = split1[1];
+        String resultPath = "/root/ts/file/" + name;
+        File file = new File(resultPath);
+
+
         // 获取文件类型
-        String fileName = file.getOriginalFilename();
+        String fileName = file.getName();
         if (StringUtils.isBlank(fileName)) {
             throw new RuntimeException("file is empty");
         }
         String[] split = fileName.split("\\.");
         String fileType = split[split.length - 1];
         if ("doc".equals(fileType) || "docx".equals(fileType)) {
-            translateWord.translateFile(file);
+            translateWord.translateFile(file,response,language);
         }else if ("xls".equals(fileType) || "xlsx".equals(fileType)) {
-            translateExcel.translateFile(file);
+            translateExcel.translateFile(file,response,language);
         }
     }
 }

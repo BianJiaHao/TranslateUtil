@@ -13,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 @Service("excelTranslate")
 public class TranslateExcelImpl implements TranslateService {
@@ -29,11 +29,11 @@ public class TranslateExcelImpl implements TranslateService {
     private TranslateCommonImpl translateCommon;
 
     @Override
-    public void translateFile(MultipartFile file) throws Exception{
+    public void translateFile(File file, HttpServletResponse response,String language) throws Exception{
         // 检查文件
         checkFile(file);
         // 获得Workbook工作薄对象
-        InputStream is = file.getInputStream();
+        InputStream is = new FileInputStream(file);
         ExcelReader reader = ExcelUtil.getReader(is);
         Workbook workbook = reader.getWorkbook();
 
@@ -71,26 +71,32 @@ public class TranslateExcelImpl implements TranslateService {
                         Cell cell = row.getCell(cellNum);
                         if (cell != null) {
                             String cellValue = getCellValue(cell);
-                            String value = translateCommon.translateToEnglish(cellValue,translateService);
+                            String value = translateCommon.translateToEnglish(cellValue,translateService,language);
                             cell.setCellValue(value);
                         }
                     }
                 }
             }
-            FileOutputStream fos = new FileOutputStream("C:\\Users\\admin\\Desktop\\test1.xlsx");
-            workbook.write(fos);
-            fos.close();
-            workbook.close();
+
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("content-Type", "application/vnd.ms-excel");
+            response.setHeader("Content-Disposition",
+                    "attachment;filename=\"" +
+                            new String(("translate" + ".xlsx").getBytes(StandardCharsets.UTF_8), "ISO8859_1") + "\"");
+            ServletOutputStream out = response.getOutputStream();
+            workbook.write(out);
+            out.flush();
+            out.close();
         }
     }
 
-    public void checkFile(MultipartFile file) throws IOException {
+    public void checkFile(File file) throws IOException {
         // 判断文件是否存在
         if (null == file) {
             throw new FileNotFoundException("文件不存在！");
         }
         // 获得文件名
-        String fileName = file.getOriginalFilename();
+        String fileName = file.getName();
         // 判断文件是否是excel文件
         if (fileName != null && !fileName.endsWith(XLS) && !fileName.endsWith(XLSX)) {
             throw new IOException(fileName + "不是excel文件");

@@ -11,9 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service("wordTranslate")
@@ -24,8 +25,8 @@ public class TranslateWordImpl implements TranslateService {
     private TranslateCommonImpl translateCommon;
 
     @Override
-    public void translateFile(MultipartFile file) throws IOException {
-        InputStream inputStream = file.getInputStream();
+    public void translateFile(File file, HttpServletResponse response,String language) throws IOException {
+        InputStream inputStream = new FileInputStream(file);
         XWPFDocument document = new XWPFDocument(inputStream);
         // 读取段落
         List<XWPFParagraph> paragraphs = document.getParagraphs();
@@ -33,7 +34,7 @@ public class TranslateWordImpl implements TranslateService {
         for (XWPFParagraph paragraph : paragraphs) {
             String text = paragraph.getParagraphText();
             if (StringUtils.isNotBlank(text)) {
-                String value = translateCommon.translateToEnglish(text, translateService);
+                String value = translateCommon.translateToEnglish(text, translateService,language);
                 List<XWPFRun> runs = paragraph.getRuns();
                 if (runs != null && runs.size() > 0) {
                     XWPFRun run = runs.get(0);
@@ -45,9 +46,17 @@ public class TranslateWordImpl implements TranslateService {
                 }
             }
         }
-        FileOutputStream fos = new FileOutputStream("C:\\Users\\admin\\Desktop\\test1.docx");
-        document.write(fos);
-        fos.close();
+
+
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("content-Type", "application/vnd.ms-word");
+        response.setHeader("Content-Disposition",
+                "attachment;filename=\"" +
+                        new String(("translate" + ".docx").getBytes(StandardCharsets.UTF_8), "ISO8859_1") + "\"");
+        ServletOutputStream out = response.getOutputStream();
+        document.write(out);
+        out.flush();
+        out.close();
         document.close();
     }
 
