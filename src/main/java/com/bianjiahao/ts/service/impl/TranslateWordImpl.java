@@ -60,4 +60,38 @@ public class TranslateWordImpl implements TranslateService {
         document.close();
     }
 
+    public String translateFile(File file,String language) throws IOException {
+        InputStream inputStream = new FileInputStream(file);
+        XWPFDocument document = new XWPFDocument(inputStream);
+        // 读取段落
+        List<XWPFParagraph> paragraphs = document.getParagraphs();
+        //List<WordFileInfo> infos = new ArrayList<>();
+        for (XWPFParagraph paragraph : paragraphs) {
+            String text = paragraph.getParagraphText();
+            if (StringUtils.isNotBlank(text)) {
+                String value = translateCommon.translateToEnglish(text, translateService,language);
+                List<XWPFRun> runs = paragraph.getRuns();
+                if (runs != null && runs.size() > 0) {
+                    XWPFRun run = runs.get(0);
+                    run.setText(value, 0);
+                    int runSize = runs.size();
+                    for (int j = runSize - 1; j >= 1; j--) {
+                        paragraph.removeRun(j);
+                    }
+                }
+            }
+        }
+        String name = file.getName();
+        String[] split = name.split("\\.");
+
+
+        String newPath =  "C:\\Users\\admin\\Desktop" + File.separator + split[0] + "_translated" + "." + split[1];
+        FileOutputStream fileOutputStream = new FileOutputStream(newPath);
+        document.write(fileOutputStream);
+        fileOutputStream.flush();
+        fileOutputStream.close();
+        document.close();
+        return newPath;
+    }
+
 }

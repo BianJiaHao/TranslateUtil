@@ -3,6 +3,7 @@ package com.bianjiahao.ts.service.impl;
 import com.volcengine.model.request.TranslateTextRequest;
 import com.volcengine.model.response.TranslateTextResponse;
 import com.volcengine.service.translate.ITranslateService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -26,13 +27,12 @@ public class TranslateCommonImpl {
             TranslateTextRequest translateTextRequest = new TranslateTextRequest();
             // translateTextRequest.setSourceLanguage("en"); // 不设置表示自动检测
             translateTextRequest.setTargetLanguage(language);
-
-
-
-            translateTextRequest.setTextList(Collections.singletonList(text));
-            TranslateTextResponse translateText = translateService.translateText(translateTextRequest);
-            List<TranslateTextResponse.Translation> list = translateText.getTranslationList();
-            ans = list.get(0).getTranslation();
+            if (StringUtils.isNotBlank(text)) {
+                translateTextRequest.setTextList(Collections.singletonList(text));
+                TranslateTextResponse translateText = translateService.translateText(translateTextRequest);
+                List<TranslateTextResponse.Translation> list = translateText.getTranslationList();
+                ans = list.get(0).getTranslation();
+            }
         } catch (Exception e) {
             System.out.println(text);
             e.printStackTrace();

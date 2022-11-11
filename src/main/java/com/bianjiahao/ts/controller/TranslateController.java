@@ -2,6 +2,7 @@ package com.bianjiahao.ts.controller;
 
 import com.bianjiahao.ts.service.impl.FileServiceImpl;
 import com.bianjiahao.ts.service.impl.TranslateExcelImpl;
+import com.bianjiahao.ts.service.impl.TranslatePdfImpl;
 import com.bianjiahao.ts.service.impl.TranslateWordImpl;
 import com.bianjiahao.ts.utils.R;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,8 @@ public class TranslateController {
     @Autowired
     private TranslateExcelImpl translateExcel;
     @Autowired
+    private TranslatePdfImpl translatePdf;
+    @Autowired
     private FileServiceImpl fileService;
 
     @PostMapping("/upload")
@@ -40,6 +43,7 @@ public class TranslateController {
         String name = split1[0];
         String language = split1[1];
         String resultPath = "/root/ts/file/" + name;
+        //String resultPath = "C:\\Users\\admin\\Desktop\\" + name;
         File file = new File(resultPath);
 
 
@@ -54,6 +58,8 @@ public class TranslateController {
             translateWord.translateFile(file,response,language);
         }else if ("xls".equals(fileType) || "xlsx".equals(fileType)) {
             translateExcel.translateFile(file,response,language);
+        } else if ("pdf".equals(fileType)) {
+            translatePdf.translateFile(file,response,language);
         }
     }
 }
